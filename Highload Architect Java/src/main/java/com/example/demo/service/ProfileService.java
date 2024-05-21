@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.Profile;
 import com.example.demo.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,13 @@ public class ProfileService {
     @Transactional
     public Profile getProfileById(UUID id, UUID token) {
         if (authService.validateToken(token)) {
-            return profileRepository.getProfileById(id);
+            Profile profile = profileRepository.getProfileById(id);
+            if (profile == null) {
+                throw new NotFoundException("Profile not found");
+            }
+            return profile;
         } else {
-            return null;
+            throw new UnauthorizedException("Invalid or expired token");
         }
     }
 }

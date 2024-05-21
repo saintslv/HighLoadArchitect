@@ -1,7 +1,10 @@
 package com.example.demo.controller;
 
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.Profile;
 import com.example.demo.service.ProfileService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +23,6 @@ public class ProfileController {
     @GetMapping("/{id}")
     public ResponseEntity<Profile> getProfileById(@PathVariable UUID id, @RequestHeader("Authorization") UUID token) {
         Profile profile = profileService.getProfileById(id, token);
-        if (profile != null) {
-            return ResponseEntity.ok(profile);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(profile);
     }
 }

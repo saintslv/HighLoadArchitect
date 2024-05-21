@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Gender;
 import com.example.demo.model.Profile;
 import org.springframework.stereotype.Repository;
@@ -38,6 +39,9 @@ public class ProfileRepository{
                         String city = resultSet.getString("city");
 
                         profile = new Profile(profileId, name, surname, dateOfBirth, gender, interests, city);
+                    }
+                    else {
+                        return null;
                     }
                 }
             }
