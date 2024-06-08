@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.User;
 import com.example.demo.model.UserCredentials;
 import com.example.demo.model.UserToken;
@@ -24,11 +23,12 @@ public class AuthService{
 
     @Transactional
     public UserToken authenticate(UserCredentials userCredentials){
+        String hashedPassword = passwordEncoder.encode(userCredentials.getPassword());
         User user = authRepository.checkCredentials(userCredentials.getUsername());
         if (user != null && passwordEncoder.matches(userCredentials.getPassword(), user.getPassword())) {
             return authRepository.createToken(user.getId());
         }
-        else throw new UnauthorizedException("invalid login or password");
+        else return null;
     }
 
     @Transactional

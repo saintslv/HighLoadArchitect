@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
