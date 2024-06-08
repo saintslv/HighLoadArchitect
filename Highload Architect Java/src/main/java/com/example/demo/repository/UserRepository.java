@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.model.User;
 import org.springframework.stereotype.Repository;
 
@@ -55,6 +56,9 @@ public class UserRepository {
                 }
             }
         } catch (SQLException e) {
+            if (e.getSQLState().equals("23505")) {
+                throw new BadRequestException("this username is already taken.");
+            }
             e.printStackTrace();
         }
         return profileId;

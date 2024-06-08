@@ -1,10 +1,14 @@
 package com.example.demo.controller;
 
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.Profile;
 import com.example.demo.service.ProfileService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,10 +24,13 @@ public class ProfileController {
     @GetMapping("/{id}")
     public ResponseEntity<Profile> getProfileById(@PathVariable UUID id, @RequestHeader("Authorization") UUID token) {
         Profile profile = profileService.getProfileById(id, token);
-        if (profile != null) {
-            return ResponseEntity.ok(profile);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Profile>> searchProfiles(@RequestParam(required = false) String name, @RequestParam(required = false) String surname, @RequestHeader("Authorization") UUID token) {
+        List<Profile> profiles = profileService.searchProfiles(name, surname, token);
+        return ResponseEntity.ok(profiles);
     }
 }
+
