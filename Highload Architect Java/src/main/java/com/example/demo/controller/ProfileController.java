@@ -28,7 +28,7 @@ public class ProfileController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Profile>> searchProfiles(@RequestParam(required = false) String name, @RequestParam(required = false) String surname, @RequestHeader("Authorization") UUID token) {
+    public ResponseEntity<List<Profile>> searchProfiles(@RequestParam String name, @RequestParam String surname, @RequestHeader("Authorization") UUID token) {
         List<Profile> profiles = profileService.searchProfiles(name, surname, token);
         return ResponseEntity.ok(profiles);
     }

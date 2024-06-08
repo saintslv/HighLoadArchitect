@@ -20,6 +20,11 @@ import java.util.*;
 import javax.sql.DataSource;
 import org.springframework.stereotype.Repository;
 
+import java.sql.*;
+import java.util.*;
+import javax.sql.DataSource;
+import org.springframework.stereotype.Repository;
+
 @Repository
 public class ProfileRepository {
 
@@ -58,39 +63,25 @@ public class ProfileRepository {
 
     public List<Profile> searchProfiles(String name, String surname) {
         List<Profile> profiles = new ArrayList<>();
-        StringBuilder searchProfilesSql = new StringBuilder("SELECT id, name, surname, date_of_birth, interests, gender, city FROM user_profile WHERE 1=1");
+        try (Connection connection = dataSource.getConnection()) {
+            String searchProfilesSql = "SELECT id, name, surname, date_of_birth, interests, gender, city FROM user_profile WHERE name LIKE ? AND surname LIKE ?";
+            try (PreparedStatement searchStatement = connection.prepareStatement(searchProfilesSql)) {
+                searchStatement.setString(1, "%" + name + "%");
+                searchStatement.setString(2, "%" + surname + "%");
+                try (ResultSet resultSet = searchStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        UUID profileId = (UUID) resultSet.getObject("id");
+                        String resultName = resultSet.getString("name");
+                        String resultSurname = resultSet.getString("surname");
+                        LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
+                        String interests = resultSet.getString("interests");
+                        String genderStr = resultSet.getString("gender");
+                        Gender gender = (genderStr != null) ? Gender.valueOf(genderStr) : null;
+                        String city = resultSet.getString("city");
 
-        List<Object> parameters = new ArrayList<>();
-
-        if (name != null && !name.isEmpty()) {
-            searchProfilesSql.append(" AND name LIKE ?");
-            parameters.add("%" + name + "%");
-        }
-        if (surname != null && !surname.isEmpty()) {
-            searchProfilesSql.append(" AND surname LIKE ?");
-            parameters.add("%" + surname + "%");
-        }
-
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement searchStatement = connection.prepareStatement(searchProfilesSql.toString())) {
-
-            for (int i = 0; i < parameters.size(); i++) {
-                searchStatement.setObject(i + 1, parameters.get(i));
-            }
-
-            try (ResultSet resultSet = searchStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    UUID profileId = (UUID) resultSet.getObject("id");
-                    String resultName = resultSet.getString("name");
-                    String resultSurname = resultSet.getString("surname");
-                    LocalDate dateOfBirth = resultSet.getDate("date_of_birth").toLocalDate();
-                    String interests = resultSet.getString("interests");
-                    String genderStr = resultSet.getString("gender");
-                    Gender gender = (genderStr != null) ? Gender.valueOf(genderStr) : null;
-                    String city = resultSet.getString("city");
-
-                    Profile profile = new Profile(profileId, resultName, resultSurname, dateOfBirth, gender, interests, city);
-                    profiles.add(profile);
+                        Profile profile = new Profile(profileId, resultName, resultSurname, dateOfBirth, gender, interests, city);
+                        profiles.add(profile);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -99,5 +90,6 @@ public class ProfileRepository {
         return profiles;
     }
 }
+
 
 
